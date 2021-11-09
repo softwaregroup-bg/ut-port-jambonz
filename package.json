@@ -3,20 +3,13 @@
     "version": "7.0.0",
     "main": "index.js",
     "dependencies": {
-        "mime-types": "2.1.22",
-        "request": "2.88.0",
-        "ut-port-webhook": "^8.1.1",
-        "uuid": "3.3.2"
     },
     "devDependencies": {
-        "tap": "^12.5.3",
-        "ut-tools": "^6.37.0"
+        "tap": "^15.0.10",
+        "ut-tools": "^6.39.0"
     },
     "peerDependencies": {
-        "ut-run": "^10.52.0"
-    },
-    "optionalDependencies": {
-        "ut-browser-request": "^1.0.2"
+        "ut-run": "^10.64.6"
     },
     "scripts": {
         "lint": "ut-lint .",
