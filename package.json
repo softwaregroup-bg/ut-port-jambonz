@@ -3,6 +3,7 @@
     "version": "7.1.0",
     "main": "index.js",
     "dependencies": {
+        "lodash.matches": "4.6.0",
         "ut-port-webhook": "^8.1.1"
     },
     "devDependencies": {
