@@ -127,47 +127,45 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 });
                             }
                             // update speech credentials
-                            for (const context of contexts) {
-                                const profile = context.contextProfile;
-                                const vendor = profile?.speechVendor;
-                                if (!['google'].includes(vendor)) continue;
-                                const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
-                                const props = {
-                                    type: profile.type || 'service_account',
-                                    auth_uri: profile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
-                                    token_uri: profile.token_uri || 'https://oauth2.googleapis.com/token',
-                                    auth_provider_x509_cert_url: profile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
-                                    project_id: profile.project_id,
-                                    private_key_id: profile.private_key_id,
-                                    private_key: context.accessToken,
-                                    client_email: context.clientId,
-                                    client_id: profile.client_id,
-                                    client_x509_cert_url: profile.client_x509_cert_url
-                                };
-                                if (!speech || !matches(props)(JSON.parse(speech.service_key))) {
-                                    if (speech) {
-                                        await this.sendRequest({
-                                            uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials/${speech.speech_credential_sid}`,
-                                            method: 'DELETE',
-                                            headers: {
-                                                authorization: authorization(speech.account_sid)
-                                            }
-                                        });
-                                    };
+                            const profile = context.contextProfile;
+                            const vendor = profile?.speechVendor;
+                            if (!['google'].includes(vendor)) continue;
+                            const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
+                            const speechProps = {
+                                type: profile.type || 'service_account',
+                                auth_uri: profile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
+                                token_uri: profile.token_uri || 'https://oauth2.googleapis.com/token',
+                                auth_provider_x509_cert_url: profile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
+                                project_id: profile.project_id,
+                                private_key_id: profile.private_key_id,
+                                private_key: context.accessToken,
+                                client_email: context.clientId,
+                                client_id: profile.client_id,
+                                client_x509_cert_url: profile.client_x509_cert_url
+                            };
+                            if (!speech || !matches(speechProps)(JSON.parse(speech.service_key))) {
+                                if (speech) {
                                     await this.sendRequest({
-                                        uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials`,
-                                        method: 'POST',
+                                        uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials/${speech.speech_credential_sid}`,
+                                        method: 'DELETE',
                                         headers: {
                                             authorization: authorization(speech.account_sid)
-                                        },
-                                        body: {
-                                            vendor,
-                                            service_key: JSON.stringify(props),
-                                            use_for_tts: true,
-                                            use_for_stt: true
                                         }
                                     });
-                                }
+                                };
+                                await this.sendRequest({
+                                    uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials`,
+                                    method: 'POST',
+                                    headers: {
+                                        authorization: authorization(speech.account_sid)
+                                    },
+                                    body: {
+                                        vendor,
+                                        service_key: JSON.stringify(speechProps),
+                                        use_for_tts: true,
+                                        use_for_stt: true
+                                    }
+                                });
                             }
                         }
                     }
