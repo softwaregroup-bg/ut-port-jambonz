@@ -81,19 +81,19 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 authorization: authorization(accountId)
                             }
                         })))).flat();
-                        for (const context of contexts) {
-                            if (context.contextProfile?.type !== 'Application') continue;
+                        for (const context of contexts.filter(({contextProfile}) => contextProfile?.type === 'Application')) {
+                            const {appId, clientId, contextProfile} = context;
                             const app = apps.find(item => item.name === context.contextName);
                             const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
                             const props = {
-                                call_hook: webhook(context.appId, 'dialogflow', context.clientId),
-                                call_status_hook: webhook(context.appId, 'status', context.clientId),
-                                messaging_hook: webhook(context.appId, 'message', context.clientId),
-                                speech_synthesis_vendor: 'google',
-                                speech_synthesis_language: 'bg-BG',
-                                speech_synthesis_voice: 'bg-bg-Standard-A',
-                                speech_recognizer_vendor: 'google',
-                                speech_recognizer_language: 'bg-BG'
+                                call_hook: webhook(appId, 'dialogflow', clientId),
+                                call_status_hook: webhook(appId, 'status', clientId),
+                                messaging_hook: webhook(appId, 'message', clientId),
+                                speech_synthesis_vendor: contextProfile.speechVendor,
+                                speech_synthesis_language: contextProfile.speechLanguage,
+                                speech_synthesis_voice: contextProfile.speechVoice,
+                                speech_recognizer_vendor: contextProfile.speechVendor,
+                                speech_recognizer_language: contextProfile.speechLanguage
                             };
                             const appResult = (!app || !matches(props)(app)) && await this.sendRequest({
                                 uri,
@@ -103,65 +103,77 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 },
                                 body: {
                                     name: context.contextName,
-                                    account_sid: context.appId,
+                                    account_sid: appId,
                                     ...props
                                 }
                             });
-                            // update Device calling application
-                            for (const accountId of accountIds) {
-                                const inbound = contexts.find(item => item.appId === accountId)?.botProfile?.inbound;
-                                if (inbound && inbound === context.clientId) {
-                                    accountsUpdate[accountId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
-                                }
-                            }
-                            // update accounts
-                            for (const [accountId, body] of Object.entries(accountsUpdate)) {
-                                const account = accounts.find(item => item.account_sid === accountId);
-                                account && !matches(body)(account) && await this.sendRequest({
-                                    uri: `/v1/Accounts/${accountId}`,
-                                    method: 'PUT',
-                                    headers: {
-                                        authorization: authorization(accountId)
-                                    },
-                                    body
-                                });
-                            }
-                            // update speech credentials
-                            const profile = context.contextProfile;
-                            const vendor = profile?.speechVendor;
-                            if (!['google'].includes(vendor)) continue;
+                            // set Device calling application
+                            accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                        }
+                        // update accounts
+                        for (const [accountId, body] of Object.entries(accountsUpdate)) {
+                            const account = accounts.find(item => item.account_sid === accountId);
+                            account && !matches(body)(account) && await this.sendRequest({
+                                uri: `/v1/Accounts/${accountId}`,
+                                method: 'PUT',
+                                headers: {
+                                    authorization: authorization(accountId)
+                                },
+                                body
+                            });
+                        }
+                        // update speech credentials
+                        for (const context of contexts.filter(({contextProfile}) => contextProfile.speechVendor && contextProfile?.type !== 'Application')) {
+                            const {appId, clientId, accessToken, contextProfile} = context;
+                            const vendor = contextProfile?.speechVendor;
                             const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
-                            const speechProps = {
-                                type: profile.type || 'service_account',
-                                auth_uri: profile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
-                                token_uri: profile.token_uri || 'https://oauth2.googleapis.com/token',
-                                auth_provider_x509_cert_url: profile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
-                                project_id: profile.project_id,
-                                private_key_id: profile.private_key_id,
-                                private_key: context.accessToken,
-                                client_email: context.clientId,
-                                client_id: profile.client_id,
-                                client_x509_cert_url: profile.client_x509_cert_url
-                            };
-                            if (!speech || !matches(speechProps)(JSON.parse(speech.service_key))) {
+                            let credentials;
+                            let match = false;
+                            switch (vendor) {
+                                case 'google':
+                                    credentials = {
+                                        type: contextProfile.type || 'service_account',
+                                        auth_uri: contextProfile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
+                                        token_uri: contextProfile.token_uri || 'https://oauth2.googleapis.com/token',
+                                        auth_provider_x509_cert_url: contextProfile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
+                                        project_id: contextProfile.project_id,
+                                        private_key_id: contextProfile.private_key_id,
+                                        private_key: accessToken,
+                                        client_email: clientId,
+                                        client_id: contextProfile.client_id,
+                                        client_x509_cert_url: contextProfile.client_x509_cert_url
+                                    };
+                                    match = matches(credentials)(JSON.parse(speech.service_key));
+                                    credentials = {service_key: JSON.stringify(credentials)};
+                                    break;
+                                case 'microsoft':
+                                    credentials = {
+                                        api_key: contextProfile.accessToken,
+                                        region: contextProfile.region
+                                    };
+                                    // TBD: fetching speech services does not return api_key for microsoft vendor
+                                    break;
+                                default: continue;
+                            }
+                            if (!speech || !match) {
                                 if (speech) {
                                     await this.sendRequest({
-                                        uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials/${speech.speech_credential_sid}`,
+                                        uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
                                         method: 'DELETE',
                                         headers: {
-                                            authorization: authorization(speech.account_sid)
+                                            authorization: authorization(appId)
                                         }
                                     });
                                 };
                                 await this.sendRequest({
-                                    uri: `/v1/Accounts/${speech.account_sid}/SpeechCredentials`,
+                                    uri: `/v1/Accounts/${appId}/SpeechCredentials`,
                                     method: 'POST',
                                     headers: {
-                                        authorization: authorization(speech.account_sid)
+                                        authorization: authorization(appId)
                                     },
                                     body: {
                                         vendor,
-                                        service_key: JSON.stringify(speechProps),
+                                        ...credentials,
                                         use_for_tts: true,
                                         use_for_stt: true
                                     }
