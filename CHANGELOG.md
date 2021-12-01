@@ -1,3 +1,12 @@
+## [7.2.1](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.2.0...v7.2.1) (2021-12-01)
+
+
+### Bug Fixes
+
+* auto sync, remove nested loop ([ca27dfd](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/ca27dfdaf0e6fad52298ea78c6d08191fbbafb21))
+
+
+
 # [7.2.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.1.0...v7.2.0) (2021-11-17)
 
 
