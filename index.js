@@ -53,132 +53,132 @@ module.exports = function jambonz({utMethod, utMeta}) {
             });
             return {
                 async ready() {
-                    if (typeof this.config.url === 'string') {
-                        const contexts = await utMethod('bot.botContext.fetch#[]')({platform: 'jambonz'}, utMeta());
-                        const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
-                        const accountIds = Array.from(new Set(contexts.map(({appId}) => appId)));
-                        const accountsUpdate = Object.fromEntries(accountIds.map(accountId => [accountId, {
-                            registration_hook: webhook(accountId, 'register')
-                        }]));
-                        const accounts = (await Promise.all(accountIds.map(accountId => this.sendRequest({
-                            uri: '/v1/Accounts',
-                            method: 'GET',
-                            headers: {
-                                authorization: authorization(accountId)
-                            }
-                        })))).flat();
-                        const apps = (await Promise.all(accountIds.map(accountId => this.sendRequest({
-                            uri: '/v1/Applications',
-                            method: 'GET',
-                            headers: {
-                                authorization: authorization(accountId)
-                            }
-                        })))).flat();
-                        const speechCredentials = (await Promise.all(accountIds.map(accountId => this.sendRequest({
-                            uri: `/v1/Accounts/${accountId}/SpeechCredentials`,
-                            method: 'GET',
-                            headers: {
-                                authorization: authorization(accountId)
-                            }
-                        })))).flat();
-                        for (const context of contexts.filter(({contextProfile}) => contextProfile?.type === 'Application')) {
-                            const {appId, clientId, contextProfile} = context;
-                            const app = apps.find(item => item.name === context.contextName);
-                            const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
-                            const props = {
-                                call_hook: webhook(appId, 'dialogflow', clientId),
-                                call_status_hook: webhook(appId, 'status', clientId),
-                                messaging_hook: webhook(appId, 'message', clientId),
-                                speech_synthesis_vendor: contextProfile.speechVendor,
-                                speech_synthesis_language: contextProfile.speechLanguage,
-                                speech_synthesis_voice: contextProfile.speechVoice,
-                                speech_recognizer_vendor: contextProfile.speechVendor,
-                                speech_recognizer_language: contextProfile.speechLanguage
-                            };
-                            const appResult = (!app || !matches(props)(app)) && await this.sendRequest({
-                                uri,
-                                method: app ? 'PUT' : 'POST',
-                                headers: {
-                                    authorization: `Bearer ${context.verifyToken}`
-                                },
-                                body: {
-                                    name: context.contextName,
-                                    account_sid: appId,
-                                    ...props
-                                }
-                            });
-                            // set Device calling application
-                            accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                    if (typeof this.config.url !== 'string') return;
+
+                    const contexts = await utMethod('bot.botContext.fetch#[]')({platform: 'jambonz'}, utMeta());
+                    const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
+                    const accountIds = Array.from(new Set(contexts.map(({appId}) => appId)));
+                    const accountsUpdate = Object.fromEntries(accountIds.map(accountId => [accountId, {
+                        registration_hook: webhook(accountId, 'register')
+                    }]));
+                    const accounts = (await Promise.all(accountIds.map(accountId => this.sendRequest({
+                        uri: '/v1/Accounts',
+                        method: 'GET',
+                        headers: {
+                            authorization: authorization(accountId)
                         }
-                        // update accounts
-                        for (const [accountId, body] of Object.entries(accountsUpdate)) {
-                            const account = accounts.find(item => item.account_sid === accountId);
-                            account && !matches(body)(account) && await this.sendRequest({
-                                uri: `/v1/Accounts/${accountId}`,
-                                method: 'PUT',
-                                headers: {
-                                    authorization: authorization(accountId)
-                                },
-                                body
-                            });
+                    })))).flat();
+                    const apps = (await Promise.all(accountIds.map(accountId => this.sendRequest({
+                        uri: '/v1/Applications',
+                        method: 'GET',
+                        headers: {
+                            authorization: authorization(accountId)
                         }
-                        // update speech credentials
-                        for (const context of contexts.filter(({contextProfile}) => contextProfile.speechVendor && contextProfile?.type !== 'Application')) {
-                            const {appId, clientId, accessToken, contextProfile} = context;
-                            const vendor = contextProfile?.speechVendor;
-                            const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
-                            let credentials;
-                            let match = false;
-                            switch (vendor) {
-                                case 'google':
-                                    credentials = {
-                                        type: contextProfile.type || 'service_account',
-                                        auth_uri: contextProfile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
-                                        token_uri: contextProfile.token_uri || 'https://oauth2.googleapis.com/token',
-                                        auth_provider_x509_cert_url: contextProfile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
-                                        project_id: contextProfile.project_id,
-                                        private_key_id: contextProfile.private_key_id,
-                                        private_key: accessToken,
-                                        client_email: clientId,
-                                        client_id: contextProfile.client_id,
-                                        client_x509_cert_url: contextProfile.client_x509_cert_url
-                                    };
-                                    match = matches(credentials)(JSON.parse(speech.service_key));
-                                    credentials = {service_key: JSON.stringify(credentials)};
-                                    break;
-                                case 'microsoft':
-                                    credentials = {
-                                        api_key: contextProfile.accessToken,
-                                        region: contextProfile.region
-                                    };
-                                    // TBD: fetching speech services does not return api_key for microsoft vendor
-                                    break;
-                                default: continue;
+                    })))).flat();
+                    const speechCredentials = (await Promise.all(accountIds.map(accountId => this.sendRequest({
+                        uri: `/v1/Accounts/${accountId}/SpeechCredentials`,
+                        method: 'GET',
+                        headers: {
+                            authorization: authorization(accountId)
+                        }
+                    })))).flat();
+                    for (const context of contexts.filter(({contextProfile}) => contextProfile?.type === 'Application')) {
+                        const {appId, clientId, contextProfile} = context;
+                        const app = apps.find(item => item.name === context.contextName);
+                        const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
+                        const props = {
+                            call_hook: webhook(appId, 'dialogflow', clientId),
+                            call_status_hook: webhook(appId, 'status', clientId),
+                            messaging_hook: webhook(appId, 'message', clientId),
+                            speech_synthesis_vendor: contextProfile.speechVendor,
+                            speech_synthesis_language: contextProfile.speechLanguage,
+                            speech_synthesis_voice: contextProfile.speechVoice,
+                            speech_recognizer_vendor: contextProfile.speechVendor,
+                            speech_recognizer_language: contextProfile.speechLanguage
+                        };
+                        const appResult = (!app || !matches(props)(app)) && await this.sendRequest({
+                            uri,
+                            method: app ? 'PUT' : 'POST',
+                            headers: {
+                                authorization: `Bearer ${context.verifyToken}`
+                            },
+                            body: {
+                                name: context.contextName,
+                                account_sid: appId,
+                                ...props
                             }
-                            if (!speech || !match) {
-                                if (speech) {
-                                    await this.sendRequest({
-                                        uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
-                                        method: 'DELETE',
-                                        headers: {
-                                            authorization: authorization(appId)
-                                        }
-                                    });
+                        });
+                        // set Device calling application
+                        accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                    }
+                    // update accounts
+                    for (const [accountId, body] of Object.entries(accountsUpdate)) {
+                        const account = accounts.find(item => item.account_sid === accountId);
+                        account && !matches(body)(account) && await this.sendRequest({
+                            uri: `/v1/Accounts/${accountId}`,
+                            method: 'PUT',
+                            headers: {
+                                authorization: authorization(accountId)
+                            },
+                            body
+                        });
+                    }
+                    // update speech credentials
+                    for (const context of contexts.filter(({contextProfile}) => contextProfile.speechVendor && contextProfile?.type !== 'Application')) {
+                        const {appId, clientId, accessToken, contextProfile} = context;
+                        const vendor = contextProfile?.speechVendor;
+                        const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
+                        let credentials;
+                        let match = false;
+                        switch (vendor) {
+                            case 'google':
+                                credentials = {
+                                    type: contextProfile.type || 'service_account',
+                                    auth_uri: contextProfile.auth_uri || 'https://accounts.google.com/o/oauth2/auth',
+                                    token_uri: contextProfile.token_uri || 'https://oauth2.googleapis.com/token',
+                                    auth_provider_x509_cert_url: contextProfile.auth_provider_x509_cert_url || 'https://www.googleapis.com/oauth2/v1/certs',
+                                    project_id: contextProfile.project_id,
+                                    private_key_id: contextProfile.private_key_id,
+                                    private_key: accessToken,
+                                    client_email: clientId,
+                                    client_id: contextProfile.client_id,
+                                    client_x509_cert_url: contextProfile.client_x509_cert_url
                                 };
+                                match = matches(credentials)(JSON.parse(speech.service_key));
+                                credentials = {service_key: JSON.stringify(credentials)};
+                                break;
+                            case 'microsoft':
+                                credentials = {
+                                    api_key: contextProfile.accessToken,
+                                    region: contextProfile.region
+                                };
+                                // TBD: fetching speech services does not return api_key for microsoft vendor
+                                break;
+                            default: continue;
+                        }
+                        if (!speech || !match) {
+                            if (speech) {
                                 await this.sendRequest({
-                                    uri: `/v1/Accounts/${appId}/SpeechCredentials`,
-                                    method: 'POST',
+                                    uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
+                                    method: 'DELETE',
                                     headers: {
                                         authorization: authorization(appId)
-                                    },
-                                    body: {
-                                        vendor,
-                                        ...credentials,
-                                        use_for_tts: true,
-                                        use_for_stt: true
                                     }
                                 });
-                            }
+                            };
+                            await this.sendRequest({
+                                uri: `/v1/Accounts/${appId}/SpeechCredentials`,
+                                method: 'POST',
+                                headers: {
+                                    authorization: authorization(appId)
+                                },
+                                body: {
+                                    vendor,
+                                    ...credentials,
+                                    use_for_tts: true,
+                                    use_for_stt: true
+                                }
+                            });
                         }
                     }
                 },
