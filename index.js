@@ -83,7 +83,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
                         }
                     })))).flat();
                     for (const context of contexts.filter(({contextProfile}) => contextProfile?.type === 'Application')) {
-                        const {appId, clientId, contextProfile} = context;
+                        const {appId, clientId, contextProfile, botProfile} = context;
                         const app = apps.find(item => item.name === context.contextName);
                         const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
                         const props = {
@@ -109,7 +109,9 @@ module.exports = function jambonz({utMethod, utMeta}) {
                             }
                         });
                         // set Device calling application
-                        accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                        if (clientId === botProfile?.inbound) {
+                            accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                        }
                     }
                     // update accounts
                     for (const [accountId, body] of Object.entries(accountsUpdate)) {
