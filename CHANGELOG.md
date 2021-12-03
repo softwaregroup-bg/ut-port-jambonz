@@ -1,3 +1,12 @@
+# [7.3.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.2.1...v7.3.0) (2021-12-03)
+
+
+### Features
+
+* microsoft speech, improved auto sync ([#2](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/2)) ([da948b2](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/da948b2daf93bc4f1c06044e378122b99509e81d))
+
+
+
 ## [7.2.1](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.2.0...v7.2.1) (2021-12-01)
 
 
