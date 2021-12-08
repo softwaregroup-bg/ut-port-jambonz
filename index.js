@@ -131,6 +131,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
                         const vendor = contextProfile?.speechVendor;
                         const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
                         let credentials;
+                        let msRemoteCredentials;
                         let match = false;
                         switch (vendor) {
                             case 'google':
@@ -154,7 +155,17 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                     api_key: contextProfile.accessToken,
                                     region: contextProfile.region
                                 };
-                                // TBD: fetching speech services does not return api_key for microsoft vendor
+                                msRemoteCredentials = await this.sendRequest({
+                                    uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
+                                    method: 'GET',
+                                    headers: {
+                                        authorization: authorization(appId)
+                                    }
+                                });
+                                match = matches(credentials)({
+                                    api_key: msRemoteCredentials.api_key,
+                                    region: msRemoteCredentials.region
+                                });
                                 break;
                             default: continue;
                         }
