@@ -8,7 +8,7 @@
     },
     "devDependencies": {
         "tap": "^15.0.10",
-        "ut-tools": "^6.39.0"
+        "ut-tools": "^6.40.0"
     },
     "peerDependencies": {
         "ut-run": "^10.64.6"
