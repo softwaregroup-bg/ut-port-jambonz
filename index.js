@@ -87,7 +87,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
                         const app = apps.find(item => item.name === context.contextName);
                         const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
                         const props = {
-                            call_hook: webhook(appId, 'dialogflow', clientId),
+                            call_hook: webhook(appId, contextProfile.processor, clientId),
                             call_status_hook: webhook(appId, 'status', clientId),
                             messaging_hook: webhook(appId, 'message', clientId),
                             speech_synthesis_vendor: contextProfile.speechVendor,
