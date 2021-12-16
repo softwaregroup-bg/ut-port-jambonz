@@ -87,7 +87,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
                         const app = apps.find(item => item.name === context.contextName);
                         const uri = app ? `/v1/Applications/${app.application_sid}` : '/v1/Applications';
                         const props = {
-                            call_hook: webhook(appId, 'dialogflow', clientId),
+                            call_hook: webhook(appId, contextProfile.processor, clientId),
                             call_status_hook: webhook(appId, 'status', clientId),
                             messaging_hook: webhook(appId, 'message', clientId),
                             speech_synthesis_vendor: contextProfile.speechVendor,
@@ -131,6 +131,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
                         const vendor = contextProfile?.speechVendor;
                         const speech = speechCredentials.find(item => item.account_sid === context.appId && item.vendor === vendor);
                         let credentials;
+                        let msRemoteCredentials;
                         let match = false;
                         switch (vendor) {
                             case 'google':
@@ -154,7 +155,17 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                     api_key: contextProfile.accessToken,
                                     region: contextProfile.region
                                 };
-                                // TBD: fetching speech services does not return api_key for microsoft vendor
+                                msRemoteCredentials = await this.sendRequest({
+                                    uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
+                                    method: 'GET',
+                                    headers: {
+                                        authorization: authorization(appId)
+                                    }
+                                });
+                                match = matches(credentials)({
+                                    api_key: msRemoteCredentials.api_key,
+                                    region: msRemoteCredentials.region
+                                });
                                 break;
                             default: continue;
                         }
@@ -209,17 +220,22 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     throw this.errors['webhook.integrityValidationFailed']();
                 },
                 [`${hook}.message.request.receive`]: (msg, $meta) => {
+                    const inbound = msg.direction === 'inbound';
                     return {
                         messageId: msg.call_sid,
                         timestamp: msg.timestamp,
                         sender: {
-                            id: msg?.sip?.headers?.from,
+                            id: inbound
+                                ? msg?.sip?.headers?.from
+                                : $meta?.params?.clientId,
                             platform: 'jambonz',
                             conversationId: msg.call_id,
                             contextId: $meta.auth.contextId
                         },
                         receiver: {
-                            id: $meta.params && $meta.params.clientId,
+                            id: inbound
+                                ? $meta?.params?.clientId
+                                : msg.to,
                             conversationId: msg.call_id
                         },
                         request: msg
