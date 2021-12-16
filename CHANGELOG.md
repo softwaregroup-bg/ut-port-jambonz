@@ -1,3 +1,12 @@
+# [7.4.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.3.0...v7.4.0) (2021-12-16)
+
+
+### Features
+
+* outbound call params, match ms credentials, dynamic call hook ([#3](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/3)) ([bae8e5d](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/bae8e5d1afed354b790edd6d3e1ec7a91faf475d))
+
+
+
 # [7.3.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.2.1...v7.3.0) (2021-12-03)
 
 
