@@ -220,23 +220,21 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     throw this.errors['webhook.integrityValidationFailed']();
                 },
                 [`${hook}.message.request.receive`]: (msg, $meta) => {
-                    const inbound = msg.direction === 'inbound';
                     return {
                         messageId: msg.call_sid,
-                        timestamp: msg.timestamp,
+                        timestamp: Date.now(),
                         sender: {
-                            id: inbound
-                                ? msg?.sip?.headers?.from
-                                : $meta?.params?.clientId,
+                            id: msg.direction === 'inbound'
+                                ? msg.from
+                                : msg.to,
                             platform: 'jambonz',
                             conversationId: msg.call_id,
                             contextId: $meta.auth.contextId
                         },
                         receiver: {
-                            id: inbound
-                                ? $meta?.params?.clientId
-                                : msg.to,
-                            conversationId: msg.call_id
+                            id: $meta?.params?.clientId,
+                            conversationId: msg.call_id,
+                            contextId: $meta.auth.nlpAgentId
                         },
                         request: msg
                     };
