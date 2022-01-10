@@ -1,3 +1,12 @@
+## [7.4.1](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.0...v7.4.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* request params ([#4](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/4)) ([20e97ef](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/20e97efd447af75e46b73cf8768ead8ff29d4eba))
+
+
+
 # [7.4.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.3.0...v7.4.0) (2021-12-16)
 
 
