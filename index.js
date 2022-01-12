@@ -53,9 +53,8 @@ module.exports = function jambonz({utMethod, utMeta}) {
             });
             return {
                 async ready() {
-                    if (typeof this.config.url !== 'string') return;
-
-                    const contexts = await utMethod('bot.botContext.fetch#[]')({platform: 'jambonz'}, utMeta());
+                    if (typeof this.config.url !== 'string' || !this.config.sync) return;
+                    const contexts = await utMethod('bot.botContext.fetch#[]')({...this.config.sync, platform: 'jambonz'}, utMeta());
                     const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
                     const accountIds = Array.from(new Set(contexts.map(({appId}) => appId)));
                     const accountsUpdate = Object.fromEntries(accountIds.map(accountId => [accountId, {
@@ -199,7 +198,11 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     if (typeof headers['jambonz-signature'] !== 'string') {
                         throw this.errors['webhook.missingHeader']({params: {header: 'jambonz-signature'}});
                     }
-                    return {
+                    return params.hook === 'did' ? {
+                        clientId: msg.to || params.clientId,
+                        appId: params.appId,
+                        platform: 'jambonz'
+                    } : {
                         clientId: params.clientId,
                         appId: params.appId,
                         platform: 'jambonz'
