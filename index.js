@@ -199,7 +199,11 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     if (typeof headers['jambonz-signature'] !== 'string') {
                         throw this.errors['webhook.missingHeader']({params: {header: 'jambonz-signature'}});
                     }
-                    return {
+                    return params.hook === 'did' ? {
+                        clientId: msg.to || params.clientId,
+                        appId: params.appId,
+                        platform: 'jambonz'
+                    } : {
                         clientId: params.clientId,
                         appId: params.appId,
                         platform: 'jambonz'
