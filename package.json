@@ -1,6 +1,6 @@
 {
     "name": "ut-port-jambonz",
-    "version": "7.4.1",
+    "version": "7.4.2",
     "main": "index.js",
     "dependencies": {
         "lodash.matches": "4.6.0",
