@@ -53,8 +53,8 @@ module.exports = function jambonz({utMethod, utMeta}) {
             });
             return {
                 async ready() {
-                    if (typeof this.config.url !== 'string' || !this.config.autosync) return;
-                    const contexts = await utMethod('bot.botContext.fetch#[]')({platform: 'jambonz', appId: this.config.autosync}, utMeta());
+                    if (typeof this.config.url !== 'string' || !this.config.sync) return;
+                    const contexts = await utMethod('bot.botContext.fetch#[]')({...this.config.sync, platform: 'jambonz'}, utMeta());
                     const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
                     const accountIds = Array.from(new Set(contexts.map(({appId}) => appId)));
                     const accountsUpdate = Object.fromEntries(accountIds.map(accountId => [accountId, {
