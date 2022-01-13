@@ -1,3 +1,12 @@
+## [7.4.3](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.2...v7.4.3) (2022-01-13)
+
+
+### Bug Fixes
+
+* credentials handling #UTCORE-121 ([285a1bc](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/285a1bcc700ddb35fa101bfb942da2fab1d2fd83)), closes [#UTCORE-121](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/UTCORE-121)
+
+
+
 ## [7.4.2](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.1...v7.4.2) (2022-01-12)
 
 
