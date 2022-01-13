@@ -24,12 +24,14 @@ Use the screenshots below to define the following properties:
 To enable automatic configuration of speech credentials, the following
 additional contexts can be defined for each bot:
 
-* For *Google Cloud Speech*:
+* For **Google Cloud Speech**:
+
   Create a service account and a key, then use it to set
   these properties in the context:
   * `clientId` - use the `client_email` from the service account key file
   * `accessToken` - use the `private_key` from the service account key file
   * `profile` - contains these additional properties:
+    * `type` - set to 'speech'
     * `speechVendor` - set to 'google'
     * `project_id` - use the `project_id` from the service account key file
     * `private_key_id` - use the `private_key_id` from the service account key file
@@ -38,3 +40,14 @@ additional contexts can be defined for each bot:
     account key file
 
 ![alt](doc/service-account.png)
+
+* For **Azure Cognitive Services**:
+
+  Create a Speech Service and use it to set these properties in the context:
+  * `clientId` - use the `Location/Region` from the Keys and Endpoint page
+  * `accessToken` - use the `KEY 1` from the Keys and Endpoint page
+  * `profile` - contains these additional properties:
+    * `type` - set to 'speech'
+    * `speechVendor` - set to 'microsoft'
+
+![alt](doc/keys.png)

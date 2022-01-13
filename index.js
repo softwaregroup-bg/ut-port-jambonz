@@ -33,7 +33,10 @@ module.exports = function jambonz({utMethod, utMeta}) {
                 log: {
                     transform: {
                         webhook_secret: 'hide',
-                        service_key: 'hide'
+                        service_key: 'hide',
+                        secret: 'hide',
+                        verifyToken: 'hide',
+                        private_key: 'hide'
                     }
                 },
                 server: {
@@ -151,10 +154,10 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 break;
                             case 'microsoft':
                                 credentials = {
-                                    api_key: contextProfile.accessToken,
-                                    region: contextProfile.region
+                                    api_key: accessToken,
+                                    region: clientId
                                 };
-                                msRemoteCredentials = await this.sendRequest({
+                                msRemoteCredentials = speech && await this.sendRequest({
                                     uri: `/v1/Accounts/${appId}/SpeechCredentials/${speech.speech_credential_sid}`,
                                     method: 'GET',
                                     headers: {
@@ -162,8 +165,8 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                     }
                                 });
                                 match = matches(credentials)({
-                                    api_key: msRemoteCredentials.api_key,
-                                    region: msRemoteCredentials.region
+                                    api_key: msRemoteCredentials?.api_key,
+                                    region: msRemoteCredentials?.region
                                 });
                                 break;
                             default: continue;
