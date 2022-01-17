@@ -52,11 +52,20 @@ module.exports = function jambonz({utMethod, utMeta}) {
             const {namespace, hook} = this.config;
             const webhook = (appId, hook, clientId) => ({
                 method: 'POST',
-                url: `${this.config.url}${this.config.path.replace('{appId}', appId).replace('{hook}', hook).replace('/{clientId?}', clientId ? `/${clientId}` : '')}`
+                url: `${this.url}${this.config.path.replace('{appId}', appId).replace('{hook}', hook).replace('/{clientId?}', clientId ? `/${clientId}` : '')}`
             });
             return {
+                async stop() {
+                    this.tunnel && this.tunnel.close();
+                },
                 async ready() {
-                    if (typeof this.config.url !== 'string' || !this.config.sync) return;
+                    if (!this.config.sync) return;
+                    if (typeof this.config.url !== 'string') {
+                        if (!this.config.tunnel) return;
+                        this.tunnel = await require('localtunnel')({port: this.config.server.port});
+                        this.url = this.tunnel.url;
+                    } else this.url = this.config.url;
+
                     const contexts = await utMethod('bot.botContext.fetch#[]')({...this.config.sync, platform: 'jambonz'}, utMeta());
                     const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
                     const accountIds = Array.from(new Set(contexts.map(({appId}) => appId)));

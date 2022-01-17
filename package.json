@@ -7,6 +7,7 @@
         "ut-port-webhook": "^8.1.1"
     },
     "devDependencies": {
+        "localtunnel": "2.0.2",
         "tap": "^15.0.10",
         "ut-tools": "^6.40.0"
     },
