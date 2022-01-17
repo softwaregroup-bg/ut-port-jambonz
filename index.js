@@ -59,12 +59,13 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     this.tunnel && this.tunnel.close();
                 },
                 async ready() {
+                    this.url = this.config.url;
                     if (!this.config.sync) return;
-                    if (typeof this.config.url !== 'string') {
+                    if (typeof this.url !== 'string') {
                         if (!this.config.tunnel) return;
                         this.tunnel = await require('localtunnel')({port: this.config.server.port});
                         this.url = this.tunnel.url;
-                    } else this.url = this.config.url;
+                    }
 
                     const contexts = await utMethod('bot.botContext.fetch#[]')({...this.config.sync, platform: 'jambonz'}, utMeta());
                     const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
