@@ -63,7 +63,10 @@ module.exports = function jambonz({utMethod, utMeta}) {
                     if (!this.config.sync) return;
                     if (typeof this.url !== 'string') {
                         if (!this.config.tunnel) return;
-                        this.tunnel = await require('localtunnel')({port: this.config.server.port});
+                        this.tunnel = await require('localtunnel')({
+                            ...this.config.tunnel,
+                            port: this.config.server.port
+                        });
                         this.url = this.tunnel.url;
                     }
 
