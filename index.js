@@ -55,7 +55,11 @@ module.exports = function jambonz({utMethod, utMeta}) {
                 url: `${this.config.url}${this.config.path.replace('{appId}', appId).replace('{hook}', hook).replace('/{clientId?}', clientId ? `/${clientId}` : '')}`
             });
             return {
+                async stop() {
+                    this.prune.length && await Promise.all(this.prune.map(deleteApp => this.sendRequest(deleteApp)));
+                },
                 async ready() {
+                    this.prune = [];
                     if (typeof this.config.url !== 'string' || !this.config.sync) return;
                     const contexts = await utMethod('bot.botContext.fetch#[]')({...this.config.sync, platform: 'jambonz'}, utMeta());
                     const authorization = appId => `Bearer ${contexts.find(item => item.appId === appId).verifyToken}`;
@@ -110,9 +114,23 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 ...props
                             }
                         });
+                        const applicationSid = app ? app.application_sid : appResult.sid;
                         // set Device calling application
                         if (clientId === botProfile?.inbound) {
-                            accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                            accountsUpdate[appId].device_calling_application_sid = applicationSid;
+                        }
+                        // test applications to delete on stop
+                        if (contextProfile.test) {
+                            this.prune = [
+                                ...this.prune,
+                                {
+                                    uri: `/v1/Applications/${applicationSid}`,
+                                    method: 'DELETE',
+                                    headers: {
+                                        authorization: `Bearer ${context.verifyToken}`
+                                    }
+                                }
+                            ];
                         }
                     }
                     // update accounts
