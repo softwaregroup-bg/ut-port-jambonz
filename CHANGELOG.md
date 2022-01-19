@@ -1,3 +1,12 @@
+# [7.5.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.3...v7.5.0) (2022-01-19)
+
+
+### Features
+
+* localtunnel ([#8](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/8)) ([590b7f9](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/590b7f9d7ab093a4fcce4b2a8065e673cbad5d1a))
+
+
+
 ## [7.4.3](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.2...v7.4.3) (2022-01-13)
 
 
