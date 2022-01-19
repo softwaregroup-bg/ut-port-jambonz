@@ -4,7 +4,7 @@
     "main": "index.js",
     "dependencies": {
         "lodash.matches": "4.6.0",
-        "ut-port-webhook": "^8.1.1"
+        "ut-port-webhook": "^8.2.0"
     },
     "devDependencies": {
         "localtunnel": "2.0.2",
@@ -12,7 +12,7 @@
         "ut-tools": "^6.40.0"
     },
     "peerDependencies": {
-        "ut-run": "^10.64.6"
+        "ut-run": "^10.64.11"
     },
     "scripts": {
         "lint": "ut-lint .",
