@@ -1,3 +1,12 @@
+# [7.6.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.5.0...v7.6.0) (2022-01-19)
+
+
+### Features
+
+* delete test apps ([#7](https://github.com/softwaregroup-bg/ut-port-jambonz/issues/7)) ([5c88291](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/5c88291e8ce9bc255f5f5146e6fcd92f50d80c68))
+
+
+
 # [7.5.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.4.3...v7.5.0) (2022-01-19)
 
 
