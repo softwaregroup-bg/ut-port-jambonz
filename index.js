@@ -56,7 +56,7 @@ module.exports = function jambonz({utMethod, utMeta}) {
             });
             return {
                 async stop() {
-                    this.prune.length && await Promise.all(this.prune.map(deleteApp => this.sendRequest(deleteApp)));
+                    this.prune?.length && await Promise.all(this.prune.map(deleteApp => this.sendRequest(deleteApp)));
                 },
                 async ready() {
                     this.prune = [];
