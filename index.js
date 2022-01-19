@@ -57,8 +57,10 @@ module.exports = function jambonz({utMethod, utMeta}) {
             return {
                 async stop() {
                     this.tunnel && this.tunnel.close();
+                    this.prune?.length && await Promise.all(this.prune.map(deleteApp => this.sendRequest(deleteApp)));
                 },
                 async ready() {
+                    this.prune = [];
                     this.url = this.config.url;
                     if (!this.config.sync) return;
                     if (typeof this.url !== 'string') {
@@ -123,9 +125,23 @@ module.exports = function jambonz({utMethod, utMeta}) {
                                 ...props
                             }
                         });
+                        const applicationSid = app ? app.application_sid : appResult.sid;
                         // set Device calling application
                         if (clientId === botProfile?.inbound) {
-                            accountsUpdate[appId].device_calling_application_sid = app ? app.application_sid : appResult.sid;
+                            accountsUpdate[appId].device_calling_application_sid = applicationSid;
+                        }
+                        // test applications to delete on stop
+                        if (contextProfile.test) {
+                            this.prune = [
+                                ...this.prune,
+                                {
+                                    uri: `/v1/Applications/${applicationSid}`,
+                                    method: 'DELETE',
+                                    headers: {
+                                        authorization: `Bearer ${context.verifyToken}`
+                                    }
+                                }
+                            ];
                         }
                     }
                     // update accounts
