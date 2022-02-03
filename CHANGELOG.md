@@ -1,3 +1,12 @@
+## [7.6.1](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.6.0...v7.6.1) (2022-02-03)
+
+
+### Bug Fixes
+
+* speech vendor defaults ([84f890f](https://github.com/softwaregroup-bg/ut-port-jambonz/commit/84f890f198b33c411f1821ff8ea93c73efa173ed))
+
+
+
 # [7.6.0](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.5.0...v7.6.0) (2022-01-19)
 
 
