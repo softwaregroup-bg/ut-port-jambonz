@@ -107,11 +107,11 @@ module.exports = function jambonz({utMethod, utMeta}) {
                             call_hook: webhook(appId, contextProfile.processor, clientId),
                             call_status_hook: webhook(appId, 'status', clientId),
                             messaging_hook: webhook(appId, 'message', clientId),
-                            speech_synthesis_vendor: contextProfile.speechVendor,
-                            speech_synthesis_language: contextProfile.speechLanguage,
-                            speech_synthesis_voice: contextProfile.speechVoice,
-                            speech_recognizer_vendor: contextProfile.speechVendor,
-                            speech_recognizer_language: contextProfile.speechLanguage
+                            speech_synthesis_vendor: contextProfile.speechVendor || 'google',
+                            speech_synthesis_language: contextProfile.speechLanguage || 'en-US',
+                            speech_synthesis_voice: contextProfile.speechVoice || 'en-US-Wavenet-A',
+                            speech_recognizer_vendor: contextProfile.speechVendor || 'google',
+                            speech_recognizer_language: contextProfile.speechLanguage || 'en-US'
                         };
                         const appResult = (!app || !matches(props)(app)) && await this.sendRequest({
                             uri,
