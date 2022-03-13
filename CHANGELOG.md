@@ -1,3 +1,7 @@
+## [7.6.2](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.6.1...v7.6.2) (2022-03-13)
+
+
+
 ## [7.6.1](https://github.com/softwaregroup-bg/ut-port-jambonz/compare/v7.6.0...v7.6.1) (2022-02-03)
 
 
